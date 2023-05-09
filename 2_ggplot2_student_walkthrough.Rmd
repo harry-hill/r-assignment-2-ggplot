@@ -1,0 +1,207 @@
+## **R Libraries: ggplot2**
+
+The R library `ggplot2` is a super useful tool we can use to create visualizations and explore our data.
+
+```{bash}
+install.packages(tidyverse)
+library(tidyverse)
+# had to manually type each into the console or search for and instaclick on in 'packages'
+```
+
+More things we can do to get more information on R and what we're doing:
+
+```{bash}
+help()
+```
+
+We'll need a few more packages for our exploration usage, too. We can install them all at once by using the `c()` function, which creates a list. We'll open these packages with the `library()` function later.
+
+```{bash}
+install.packages(c("nycflights13", "gapminder", "Lahman"))
+# had to manually type each into the console
+# i.e. install.packages("Lahman")
+```
+
+Built in to our tidyverse are several data sets that we can play around with. In the below code block, we create a variable `myplot` and save the `mpg` database to it.
+
+```{r}
+# mpg -> subset of car fuel economy data from the EPA
+myplot <- mpg
+myplot
+# datatype ; a 'tibble' ; like a more frustrating python dataframe, they complain about things that dataframes don't, however it is nice because it complains up front so we can fix things instead of doing it during a presentation in front of our bosses
+
+# excellent tool for viewing whole dataset in a spreadsheet; supports sorting by column and searching
+View(myplot)
+```
+
+**Something you should be aware of and have open (perhaps on a second monitor, or you can print them out) is the ggplot2 cheat sheet!** <https://github.com/rstudio/cheatsheets/blob/main/data-visualization-2.1.pdf>
+
+```{r}
+# 'hey I'm gonna use ggplot, I'm going to make a plot and pass in the mpg dataset for my data
+# geom_point() creates scatterplots
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy))
+
+# engine displacement -> how big the engine is
+# hwy -> mileage
+
+# smaller the engine, the better the gas mileage
+```
+
+```{r}
+# motor trend dataset ; design and performance on 32 cars
+mtcars 
+
+View(mtcars)
+```
+
+```{r}
+# can do on one line or split on the +
+# add in color scheme by a column
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = class))
+
+# whoaaaaa it handles everything for you and spits out an incredible pretty graph
+```
+
+```{r}
+# color by conditional statement
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = displ < 5))
+```
+
+```{r}
+# facet_wrap() separates subplots by a column grouping
+# could have done color = rgb(0.7,1,0.3)
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = class)) +
+  facet_wrap(~ class, nrow = 2)
+
+# can also add aes(x=,y=,color=,shape = class) for interesting effect (only 6 default symbols however, can specify a manual shape)
+```
+
+```{r}
+# 
+# looking at miles per gallon x engine size for different drive train types
+# facet_grid(drv ~ .) facet_grid is a good type comparison ; 'drv ~ .' = use all drive trains
+ggplot(data = mpg) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = drv)) +
+  facet_grid(drv ~ .)
+```
+
+```{r}
+# geom_smooth is a great way of showing area/direction of different subsets in a graph
+# aes(linetype)
+# two plots on top of each other
+ggplot(data = mpg) + 
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv)) +
+  geom_point(mapping = aes(x = displ, y = hwy, color = drv))
+
+# without geom_smooth area shading, gets a bit confusing in the middle
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, linetype = drv)) +
+  geom_point(mapping = aes(color = class)) +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+# discrete graphs look for an attribute of our data
+# diamonds dataset came with ggplot
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut))
+```
+
+Whoa, where'd count come from? **Count is not a variable or attribute of the variable diamonds!** Count comes automatically with a lot of graphs as an attribute. You can verify what I'm saying with `?diamonds` in the console. It shows up because this is a discrete data set, rather than the continuous data set that we have been using.
+
+Any attribute of a data set that is algorithmically calculated is called a *stat*, which is short for a statistical transformation. Many of the **geom** functions have stats built in, and many stats display geoms. For example, the above code block used a geom, but this one uses a stat, and results in an identical chart:
+
+```{r}
+# shows that stat_count is built into geom_bar
+ggplot(data = diamonds) +
+  stat_count(mapping = aes(x = cut))
+```
+
+Let's add color here!
+
+```{r}
+# aes(color) = for bar graphs only outlines, not easy to see
+# aes(fill) = much betterrrrr
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = cut))
+```
+
+What if we add to a different variable than cut?
+
+```{r}
+# position = "fill" good option for classic pie chart
+# theme()
+# labs() for labels, here we are getting rid of x/y labels
+# coord_polar() used for pie charts
+pie = ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, fill = clarity),
+           position = "dodge"
+  ) +
+  theme(aspect.ratio = 1) +
+  labs(x = NULL, y = NULL)
+
+pie + coord_polar()
+
+# can see which clarities have the best cuts
+
+# sidenote: if you have a lot of datapoints but they're very similar, use geom_jitter() and it will move points around to show the minute differences and densities
+```
+
+**For your consideration...** Is the above a good graph?
+
+```{r}
+# little too small to see clearly
+```
+
+## Homework
+
+```{r}
+# Find a builtin data set for students to explore; use their cheat sheet from stats to label continuous and discrete data; Use graphs to tell me things about 3 datsets
+
+# help -> ggplot2-package -> look for datasets that came with it -> diamonds, mpg, txhousing
+
+# nycflights13 has sooooo much data and data subsets accessed by nycflights::subset (will fill in options, there are 5)
+
+View(nycflights13::airlines)
+View(nycflights13::airports)
+View(nycflights13::flights)
+  # discrete: carriers, tailnumbers
+View(nycflights13::planes)
+View(nycflights13::weather)
+
+```
+
+```{r}
+# airplane speed based on number of engines and type
+ggplot(data = nycflights13::planes) +
+  geom_col(mapping = aes(x = engines, y = speed, fill = engine))
+
+# The fastest planes have 2 reciprocating engines
+# Turbo-prop and turbo-shaft tend to be slow
+# Planes with 1 or 4 reciprocating engines are slow
+```
+
+```{r}
+# distribution of flight distances by carrier
+# x = carrier, y = distance
+# two discrete variables -> geom_count
+
+ggplot(data = nycflights13::flights) +
+  geom_count(mapping = aes(x = carrier, y = distance))
+
+# Hawaiian goes long distance only; island
+# US Airways is very concentrated in shirt and medium distance
+# Virgin America is all medium distance; trans-Atlantic flights?
+# United Air has the most spread distribution
+```
+
+```{r}
+# wind speed by airport origin?
+# one continuous variable, one discrete -> geom_col
+
+ggplot(data = nycflights13::weather) +
+  geom_col(mapping = aes(x = origin, y = wind_speed))
+
+# JFK has the highest average wind speed out of the three! EWR the lowest
+```
